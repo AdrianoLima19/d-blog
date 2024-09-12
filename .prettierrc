@@ -1,0 +1,9 @@
+{
+  "endOfLine": "crlf",
+  "printWidth": 120,
+  "tabWidth": 2,
+  "trailingComma": "none",
+  "bracketSameLine": false,
+  "singleQuote": true,
+  "useTabs": false
+}
