@@ -13,27 +13,27 @@ Com este projeto, busco aprofundar meus conhecimentos e evoluir continuamente, e
 
 1. Clone o repositório para o seu ambiente local:
 
-```sh
-git clone https://github.com/AdrianoLima19/d-blog.git
-```
+   ```sh
+   git clone https://github.com/AdrianoLima19/d-blog.git
+   ```
 
 2. Navegue até o diretório do projeto:
 
-```sh
-cd d-blog
-```
+   ```sh
+   cd d-blog
+   ```
 
 3. Instale as dependências usando Composer:
 
-```sh
-composer install
-```
+   ```sh
+   composer install
+   ```
 
 4. Inicie o servidor web apontando para o diretório `public`:
 
-```sh
-php -S localhost:8080 -t public
-```
+   ```sh
+   php -S localhost:8080 -t public
+   ```
 
 ## Contribuição
 
