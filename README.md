@@ -29,10 +29,10 @@ cd d-blog
 composer install
 ```
 
-1. Inicie o servidor web:
+4. Inicie o servidor web apontando para o diretório `public`:
 
 ```sh
-php dev
+php -S localhost:8080 -t public
 ```
 
 ## Contribuição
