@@ -1,0 +1,92 @@
+#!/usr/bin/env php
+<?php
+
+foreach ($argv as $arg) {
+    if (preg_match('/--([^=]+)=(.*)/', $arg, $matches)) {
+        $arguments[$matches[1]] = $matches[2];
+    }
+}
+
+$host = $arguments['host'] ?? 'localhost';
+$port = $arguments['port'] ?? 8080;
+
+$command = "php -S $host:$port ./framework/resources/server.php";
+
+$descriptors = [
+    0 => STDIN,
+    1 => STDOUT,
+    2 => ['pipe', 'w'],
+];
+
+$process = @proc_open($command, $descriptors, $pipes);
+
+if (is_resource($process)) {
+    $size = getCliLength();
+
+    while (!feof($pipes[2])) {
+        $output = fgets($pipes[2]);
+
+        if (trim($output) !== '') {
+            $start = microtime(true);
+            parseAndWrite($output, $size, microtime(true));
+        }
+
+        usleep(100000);
+    }
+} else {
+    throw new \RuntimeException('Unable to launch a new process.');
+}
+
+function getCliLength(): int
+{
+    exec('stty size', $size);
+
+    if (!isset($size[0])) {
+        throw new Exception("Error Processing Request");
+    }
+
+    $length = explode(' ', $size[0])[1] ?? '80';
+
+    return (int) $length;
+}
+
+function parseAndWrite($output, $size, $start)
+{
+    preg_match('/\[(.*?)\]/', $output, $matches);
+
+    $date = DateTime::createFromFormat('D M d H:i:s Y', ($matches[1] ?? trim($matches[0], '[]')), new
+        DateTimeZone('America/Sao_Paulo'));
+
+    $gray = "\033[0;90m";
+    $default = "\033[39m";
+    $yellow = "\033[1;93m";
+    $red = "\033[1;31m";
+    $green = "\033[1;32m";
+
+    if (preg_match('/\((https?:\/\/[^\)]+)\)/', $output, $url)) {
+        $url = trim($url[0], '()[]');
+
+        echo "\n  Servidor iniciado em [$url]\n\n";
+        echo "  Pressione Ctrl+C para encerrar o servidor.\n\n";
+    } elseif (preg_match('/Closing/', $output)) {
+        $timeElapsed = microtime(true) - $start;
+        $timeElapsed = $timeElapsed * 1000;
+
+        $prefix = "  {$date->format('d-m-Y')} {$date->format('H:i:s')} ";
+        $suffix = " ~ " . number_format($timeElapsed * 1000, 3, '.', ',') . ' ms';
+
+        $remainingLength = $size - strlen($prefix) - strlen($suffix);
+        $dots = str_repeat('. ', intval($remainingLength / 2));
+        $dots = substr($dots, 0, $remainingLength);
+
+        if ($timeElapsed <= 0.050) {
+            $timer = $green;
+        } elseif ($timeElapsed <= 0.100) {
+            $timer = $yellow;
+        } else {
+            $timer = $red;
+        }
+
+        echo "  {$date->format('d-m-Y')} {$date->format('H:i:s')} {$gray}{$dots} ~ {$timer}" . number_format($timeElapsed * 1000, 3, '.', ',') . " ms";
+    }
+}
